@@ -1,0 +1,115 @@
+import requests
+import time
+import json
+import arquivo
+
+class TelegramBot:
+    def __init__(self): # Conexão com o telegram 
+        token = 'TokenTelegram'
+        self.url_base = f'https://api.telegram.org/bot{token}/'
+
+    def Iniciar(self): # Inicializar
+        update_id = None
+        while True:
+            atualizacao = self.obter_novas_mensagens(update_id)
+            dados = atualizacao["result"]
+            if dados:
+                for dado in dados:
+                    update_id = dado['update_id']
+                    mensagem = str(dado["message"]["text"])
+                    chat_id = dado["message"]["from"]["id"]
+                    eh_primeira_mensagem = int(
+                        dado["message"]["message_id"]) == 1
+                    resposta = self.criar_resposta(
+                        mensagem, eh_primeira_mensagem)
+                    self.responder(resposta, chat_id)
+
+    def obter_novas_mensagens(self, update_id): # Obter mensagens
+        link_requisicao = f'{self.url_base}getUpdates?timeout=100'
+        if update_id:
+            link_requisicao = f'{link_requisicao}&offset={update_id + 1}'
+        resultado = requests.get(link_requisicao)
+        return json.loads(resultado.content)
+    
+    def criar_resposta(self, mensagem, eh_primeira_mensagem): # Criar uma resposta
+        if eh_primeira_mensagem == True:
+            return f'''
+        Digite a opção disponível:
+       1 - Produção Mensal do arquivo
+       2 - Falhas do dia do 1º turno
+       3 - Falhas do dia do 2º turno
+       4 - Todas as falhas do dia anterior
+       5 - Top 10 falhas do dia do 1º turno
+       6 - Top 10 falhas do dia do 2º turno
+       7 - Top 10 falhas do dia anterior
+       8 - Top 10 falhas de processo do dia do 1º turno
+       9 - Top 10 falhas de processo do dia do 2º turno
+       10 - Top 10 falhas de processo do dia anterior
+        
+            '''
+        if mensagem == '1':
+            consulta1 = arquivo.consulta1()
+            return consulta1
+
+        elif mensagem == '2':
+            consulta2 = arquivo.consulta2()
+            return consulta2
+
+        elif mensagem == '3':
+            consulta3 = arquivo.consulta3()
+            return consulta3
+
+        elif mensagem == '4':
+            consulta4 = arquivo.consulta4()
+            return consulta4
+
+        elif mensagem == '5':
+            consulta5 = arquivo.consulta5()
+            return consulta5
+        
+        elif mensagem == '6':
+            consulta6 = arquivo.consulta6()
+            return consulta6
+        
+        elif mensagem == '7':
+            consulta7 = arquivo.consulta7()
+            return consulta7
+        
+        elif mensagem == '8':
+            consulta8 = arquivo.consulta8()
+            return consulta8
+        
+        elif mensagem == '9':
+            consulta9 = arquivo.consulta9()
+            return consulta9
+        
+        elif mensagem == '10':
+            consulta10 = arquivo.consulta10()
+            return consulta10
+        
+
+        else:
+            return f'''
+        Digite a opção disponível:
+       1 - Produção Mensal do arquivo
+       2 - Falhas do dia do 1º turno
+       3 - Falhas do dia do 2º turno
+       4 - Todas as falhas do dia anterior
+       5 - Top 10 falhas do dia do 1º turno
+       6 - Top 10 falhas do dia do 2º turno
+       7 - Top 10 falhas do dia anterior
+       8 - Top 10 falhas de processo do dia do 1º turno
+       9 - Top 10 falhas de processo do dia do 2º turno
+       10 - Top 10 falhas de processo do dia anterior
+
+
+        
+            '''
+
+    def responder(self, resposta, chat_id): # Responder
+        link_requisicao = f'{self.url_base}sendMessage?chat_id={chat_id}&text={resposta}'
+        requests.get(link_requisicao)
+
+
+bot = TelegramBot()
+bot.Iniciar()
